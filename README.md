@@ -21,6 +21,6 @@
 - Ana Carolina Esteves
 - Julia Guimarães Simão
 - Manu Borba
-- Rodrigo
+- Rodrigo Touma Costa
 
 
