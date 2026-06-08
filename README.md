@@ -3,13 +3,13 @@
 ## Projeto Final
 - Github para o projeto final de microcontroladores
 
-## Tema Geral
+### Tema Geral
 - Brinquedos Inteligentes
 
-## Tema deste grupo
-- Teatro interativo
+### Tema deste grupo
+- Teatro Interativo
 
-## Funcionalidades Principais
+### Funcionalidades Principais
 - Interação entre personagens e o palco
 - Peças e motifs para cada personagem
 - Voz específica para cada personagem
