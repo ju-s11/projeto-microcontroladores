@@ -30,7 +30,7 @@
 ### Participantes
 - Ana Carolina Esteves
 - Julia Guimarães Simão
-- Manu Borba
+- Manuela de Carvalho Borba
 - Rodrigo Touma Costa
 
 
