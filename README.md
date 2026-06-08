@@ -9,6 +9,10 @@
 ### Tema deste grupo
 - Teatro Interativo
 
+### Rascunho do 
+<img width="1221" height="1196" alt="image" src="https://github.com/user-attachments/assets/7ed774ac-ea39-476d-9886-684b10b6cf08" />
+
+
 ## Funcionalidades Principais
 - Interação entre personagens e o palco
 - Peças e motifs para cada personagem
@@ -19,8 +23,8 @@
 
 ## Outros Materiais
 
-- Trello: 
-- Docs: 
+- Trello: https://trello.com/b/B9uZq9nN/micro-a5-ana-julia-manuela-rodrigo-t
+- Docs: https://drive.google.com/drive/folders/1hnw8QK1angMt26_Fw4fyTzIAj6krqg33
 
 ### Participantes
 - Ana Carolina Esteves
