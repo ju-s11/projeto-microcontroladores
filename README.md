@@ -24,7 +24,8 @@
 ## Outros Materiais
 
 - Trello: https://trello.com/b/B9uZq9nN/micro-a5-ana-julia-manuela-rodrigo-t
-- Docs: https://drive.google.com/drive/folders/1hnw8QK1angMt26_Fw4fyTzIAj6krqg33
+- Drive: https://drive.google.com/drive/folders/1hnw8QK1angMt26_Fw4fyTzIAj6krqg33
+- Docs: https://docs.google.com/document/d/1PYMwqnnCO5G9gOYDpm3xE0Ci5vISYDDni-ZwOZEDy2k/edit?usp=sharing
 
 ### Participantes
 - Ana Carolina Esteves
