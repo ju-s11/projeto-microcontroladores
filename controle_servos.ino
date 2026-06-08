@@ -6,30 +6,52 @@ Servo servos[NUM_SERVOS];
 
 int pinos[NUM_SERVOS] = {9, 10, 11};
 
-//substituir delay por millis:
-/*
+bool movendo[NUM_SERVOS] = {false, false, false};
 
-unsigned long instante_inicial = 0;
+unsigned long ultimo_tempo[NUM_SERVOS];
 
-if (millis() > instante_inicial + 10) {
- instante_inicial = millis();
-}
-*/
+int etapa[NUM_SERVOS] = {0, 0, 0};
+int repeticoes[NUM_SERVOS] = {0, 0, 0};
 
 void subir(int id) {
   servos[id].write(180);
 }
 
-void mover(int id) {
-  for(int i = 0; i  <= 3; i++) {
-    servos[id].write(60);
-    delay(500);
-    servos[id].write(120);
-    delay(500);
+void iniciar_mover(int id) {
+  movendo[id] = true;
+  etapa[id] = 0;
+  repeticoes[id] = 0;
+  ultimo_tempo[id] = millis();
+
+  servos[id].write(60);
+}
+
+void atualizar_mover(int id) {
+  if (!movendo[id]) {
+    return;
+  }
+
+  if(millis() - ultimo_tempo[id] >= 500) {
+    ultimo_tempo[id] = millis();
+
+    if (etapa[id] == 0) {
+      servos[id].write(120);
+      etapa[id] = 1;
+    }
+    else {
+      servos[id].write(60);
+      etapa[id] = 0;
+
+      repeticoes[id]++;
+
+      if(repeticoes[id] >= 3) {
+        movendo[id] = false;
+      }
+    }
   }
 }
 
-void desaparecer(int id) {
+void descer(int id) {
   servos[id].write(0);
 }
 
@@ -46,6 +68,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  for (int i = 0; i < NUM_SERVOS; i++) {
+    atualizar_mover(i);
+  }
+
   if(Serial.available() > 0) {
     String linha = Serial.readStringUntil('\n');
     linha.trim();
@@ -71,10 +97,10 @@ void loop() {
       subir(id);
     }
     else if (acao == "mover") {
-      mover(id);
+      iniciar_mover(id);
     }
-    else if (acao == "desaparecer") {
-      desaparecer(id);
+    else if (acao == "descer") {
+      descer(id);
     }
     else {
       Serial.println("Acao desconhecida");
