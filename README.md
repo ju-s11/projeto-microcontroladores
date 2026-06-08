@@ -10,7 +10,7 @@
 - Teatro Interativo
 
 ### Rascunho Inicial
-<img width="610" height="598" alt="image" src="https://github.com/user-attachments/assets/7ed774ac-ea39-476d-9886-684b10b6cf08" />
+<img width="305" height="299" alt="image" src="https://github.com/user-attachments/assets/7ed774ac-ea39-476d-9886-684b10b6cf08" />
 
 
 ## Funcionalidades Principais
