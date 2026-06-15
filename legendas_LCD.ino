@@ -11,7 +11,7 @@ int totalLinhas = 0;
 int linhaAtualScroll = 0;
 
 unsigned long ultimoTempoScroll = 0;
-const int velocidadeScroll = 1250;
+const int velocidadeScroll = 1500;
 
 void setup() {
   // put your setup code here, to run once:
@@ -26,13 +26,13 @@ void setup() {
 }
 
 void loop() {
-  // put your setup code here, to run once:
+  // put your main code here, to run repeatedly:
   if (Serial.available() > 0) {
     String mensagemCompleta = Serial.readStringUntil('\n');
     mensagemCompleta.trim();
     
-    quebrarTextoEmLinhas(mensagemCompleta);
-    
+    arrumaMensagem(mensagemCompleta);
+ 
     linhaAtualScroll = 0;
     lcd.clear();
     atualizarDisplay();
@@ -54,23 +54,43 @@ void loop() {
   }
 }
 
-void quebrarTextoEmLinhas(String texto) {
+void arrumaMensagem(String texto) {
   totalLinhas = 0;
   String linhaAtual = "";
-  
+
   int indiceEspaco = 0;
+  int quebraSemEspaco = 0;
+
   while (texto.length() > 0 && totalLinhas < 50) {
     indiceEspaco = texto.indexOf(' ');
     String palavra;
-    
     if (indiceEspaco == -1) {
       palavra = texto;
       texto = "";
-    } else {
+    }
+    else {
       palavra = texto.substring(0, indiceEspaco);
       texto = texto.substring(indiceEspaco + 1);
     }
+
+    if (palavra.length() > COLUNAS_LCD) {
+      if (linhaAtual.length() > 0) {
+        linhasTexto[totalLinhas] = linhaAtual;
+        totalLinhas++;
+        linhaAtual = "";
+      }
     
+
+      while (palavra.length() > COLUNAS_LCD && totalLinhas < 50) {
+        linhasTexto[totalLinhas] = palavra.substring(0, COLUNAS_LCD);
+        totalLinhas++;
+        palavra = palavra.substring(COLUNAS_LCD);
+      }
+
+      linhaAtual = palavra;
+      continue;
+    }
+
     if (palavra.length() == 0) continue;
 
     if (linhaAtual.length() + palavra.length() + (linhaAtual.length() > 0 ? 1 : 0) <= COLUNAS_LCD) {
@@ -78,7 +98,8 @@ void quebrarTextoEmLinhas(String texto) {
         linhaAtual += " ";
       }
       linhaAtual += palavra;
-    } else {
+    } 
+    else {
       linhasTexto[totalLinhas] = linhaAtual;
       totalLinhas++;
       linhaAtual = palavra;
@@ -108,4 +129,6 @@ void atualizarDisplay() {
       }
     }
   }
+}
+  lcd.print("Tente novamente");
 }
