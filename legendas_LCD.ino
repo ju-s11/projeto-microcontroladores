@@ -30,7 +30,7 @@ void loop() {
   if (Serial.available() > 0) {
     String mensagemCompleta = Serial.readStringUntil('\n');
     mensagemCompleta.trim();
-    
+
     arrumaMensagem(mensagemCompleta);
  
     linhaAtualScroll = 0;
@@ -112,6 +112,7 @@ void arrumaMensagem(String texto) {
   }
 }
 
+
 void atualizarDisplay() {
   for (int i = 0; i < LINHAS_LCD; i++) {
     lcd.setCursor(0, i);
@@ -129,6 +130,4 @@ void atualizarDisplay() {
       }
     }
   }
-}
-  lcd.print("Tente novamente");
 }
