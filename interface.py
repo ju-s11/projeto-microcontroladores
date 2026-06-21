@@ -9,6 +9,14 @@ import threading
 estado_teatro = False
 motor = None
 
+historia = [
+            {"personagem": "Margaret Hamilton", "texto": "The interface is now controlling the theater!"},
+            {"personagem": "Isaac Newton", "texto": "Amazing! It actually works live."},
+            {"personagem": "Ada LoveLace", "texto": "Splendid! Everything is connected now."}
+        ]
+
+indice_historia = 0
+
 #funcoes dos botoes
 def registrar(mensagem):
     hora_atual = datetime.now().strftime("%H:%M:%S")
@@ -16,11 +24,12 @@ def registrar(mensagem):
     caixa_deb.see(tkinter.END)
 
 def iniciar_teatro():
-    global estado_teatro, motor
+    global estado_teatro, motor, indice_historia
     
     if estado_teatro == False:
         registrar("Teatro Iniciado...")
         estado_teatro = True
+        indice_historia = 0
         
         config_vozes = {
             "Ada LoveLace":{
@@ -42,11 +51,6 @@ def iniciar_teatro():
         
         motor = GerenciadorDeVozes(config_vozes)
         motor.cortar_cena = False
-        historia = [
-            {"personagem": "Margaret Hamilton", "texto": "The interface is now controlling the theater!"},
-            {"personagem": "Isaac Newton", "texto": "Amazing! It actually works live."},
-            {"personagem": "Ada LoveLace", "texto": "Splendid! Everything is connected now."}
-        ]
     
         def tarefa_thread():
             global estado_teatro
@@ -60,6 +64,45 @@ def iniciar_teatro():
         estado_teatro = False
         if motor:
             motor.parar_teatro()
+
+def prox_fala():
+    global motor, indice_historia
+    
+    if indice_historia >= len(historia):
+        registrar("Não há mais falas.")
+        return
+    
+    config_vozes = {
+        "Ada LoveLace":{
+            "voz": TODAS_VOZES[voz_ada.get()],
+            "volume":vol_ada.get()/100,
+            "velocidade":100.0/vel_ada.get()
+            },
+        "Margaret Hamilton": {
+            "voz": TODAS_VOZES[voz_marg.get()],
+            "volume":vol_marg.get()/100,
+            "velocidade":100.0/vel_marg.get()
+            },
+        "Isaac Newton": {
+            "voz": TODAS_VOZES[voz_isaac.get()],
+            "volume":vol_isaac.get()/100,
+            "velocidade":100.0/vel_isaac.get()
+            }
+        }
+    
+    
+    if motor is None:
+        motor = GerenciadorDeVozes(config_vozes)
+    
+    motor.cortar_cena = False
+    fala_atual = [historia[indice_historia]]
+    
+    def tarefa_thread():
+        global indice_historia
+        motor.processar_mensagem(fala_atual, registrar)
+        indice_historia += 1
+    
+    threading.Thread(target=tarefa_thread).start()
 
 def mudar_lua():
     registrar("Posição da Lua alterada")
@@ -169,8 +212,12 @@ abas.add(aba_debug, text="Debug")
 
 
 #debug
-title_deb = tkinter.Label(aba_debug, text="Debug:", font=("Arial", 9, "bold"))
-title_deb.pack(pady=15)
+
+frame = tkinter.Frame(aba_debug)
+frame.pack()
+title_deb = tkinter.Label(frame, text="Debug:", font=("Arial", 9, "bold"))
+title_deb.pack(side = tkinter.CENTER, pady=10)
+tkinter.Button(frame, text="Falar Próxima Fala", command=prox_fala, bg="lightgrey", font=("Arial", 10, "bold")).pack(side = tkinter.RIGHT, pady=5)
 
 caixa_deb = tkinter.Text(aba_debug, height = 20, width = 70, bg = "black", fg="lime")
 caixa_deb.pack()
@@ -286,3 +333,4 @@ tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_co
 carregar_conf()
 
 janela.mainloop()
+
