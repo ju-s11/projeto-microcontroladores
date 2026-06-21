@@ -213,11 +213,12 @@ abas.add(aba_debug, text="Debug")
 
 #debug
 
-frame = tkinter.Frame(aba_debug)
-frame.pack()
+frame = tkinter.Frame(aba_debug, height = 30)
+frame.pack(pady=15, fill="x", padx=25)
+
 title_deb = tkinter.Label(frame, text="Debug:", font=("Arial", 9, "bold"))
-title_deb.pack(side = tkinter.CENTER, pady=10)
-tkinter.Button(frame, text="Falar Próxima Fala", command=prox_fala, bg="lightgrey", font=("Arial", 10, "bold")).pack(side = tkinter.RIGHT, pady=5)
+title_deb.place(relx=0.5, rely=0.5, anchor="center")
+tkinter.Button(frame, text="Próxima Fala", command=prox_fala, bg="lightgrey", font=("Arial", 10, "bold")).place(relx=1.0, rely=0.5, anchor="e")
 
 caixa_deb = tkinter.Text(aba_debug, height = 20, width = 70, bg = "black", fg="lime")
 caixa_deb.pack()
