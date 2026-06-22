@@ -16,6 +16,9 @@ TODAS_VOZES = {
     "Alan": "modelos/en_GB-alan-medium.onnx",
 }
 
+pygame.init()
+pygame.mixer.init()
+
 class GerenciadorDeVozes:
     def __init__ (self, configuracao):
         self.vozes_carregadas = {}
@@ -54,7 +57,6 @@ class GerenciadorDeVozes:
 
     def processar_mensagem(self, lista_frases, deb_print=None):
 
-        pygame.mixer.init()
         fila_de_audios = queue.Queue() 
 
         def tocar_audios():
@@ -118,7 +120,6 @@ class GerenciadorDeVozes:
         fila_de_audios.put(None)
 
         thread.join()
-        pygame.mixer.quit()
         
         print("\n\nProcesso concluido")
 
