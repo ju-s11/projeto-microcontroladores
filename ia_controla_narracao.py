@@ -162,14 +162,15 @@ tools = [verificar_palco, mover_elemento, acender_led, narrar, salvar_historia]
 #Verificar se eu preciso passar o nome das tools mesmo ou nao
 agent = CodeAgent(
     tools = tools,
-    model = modelo
+    model = modelo,
+    additional_authorized_imports=["random"]
 )
 
 prompt = """
 Você é o diretor de um teatro científico automatizado. 
             
 Loop:
-1. Cheque se há um ou mais personagens no palco, com verificar_palco(). O retorno pode ser um único cientista ou vários separados por vírgula, ex: 'Isaac Newton, Albert Einstein, Ada Lovelace'.
+1. Cheque se há um ou mais personagens no palco, com verificar_palco(). O retorno pode ser um único cientista ou vários separados por vírgula, ex: 'Isaac Newton, Margaret Hamilton, Ada Lovelace'.
 2. Se o retorno for diferente de 'Sem mudanças', faça o seguinte:
     2.1. Printe qual(is) cientista(s) está(ão) no palco.
     2.2.  Ative as ferramentas mover_elemento() e acender_led() adequadas para cada um deles.
@@ -185,6 +186,10 @@ Se o resultado for 'Sem mudanças', não faça nada.
 
 Execute esse loop continuamente. 
 
-"""    
-agent.run(prompt)
+"""
+
+def iniciar_loop_ia():
+    agent.run(prompt)
             
+
+
