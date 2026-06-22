@@ -3,9 +3,9 @@ from tkinter import ttk
 from datetime import datetime
 import json
 import os
-from Narracoes import GerenciadorDeVozes, TODAS_VOZES
+from narracoes import GerenciadorDeVozes, TODAS_VOZES
 import threading
-import teste_ia
+import ia_controla_narracao2 as teste_ia 
 import time
 
 estado_teatro = False
@@ -17,13 +17,16 @@ ultima_data_json = 0
 
 def carregar_historia():
     global historia
-    
-    if os.path.exists("historia.json"):
-        with open ("historia.json", "r", encoding="utf-8") as arquivo:
-            historia = json.load(arquivo)
-    else:
-        registrar("Nenhuma história encontrada")
-        historia = []
+    try:
+        if os.path.exists("historia.json"):
+            with open ("historia.json", "r", encoding="utf-8") as arquivo:
+                historia = json.load(arquivo)
+        else:
+            registrar("Nenhuma história encontrada")
+            historia = []
+    except (json.JSONDecodeError, PermissionError):
+        # Se o arquivo estiver sendo escrito pela IA, ignora esse frame e espera o próximo
+        return None
 
 def vigiar_roteiro():
     global ultima_data_json, motor, estado_teatro
@@ -43,6 +46,17 @@ def vigiar_roteiro():
                 threading.Thread(target=motor.processar_mensagem, args=(historia, registrar), daemon=True).start()
 
     janela.after(2000, vigiar_roteiro)
+    '''historia = carregar_historia()
+    
+    # Adicione a checagem aqui:
+    if historia is not None:
+        # Move todo o código que manda tocar o áudio para dentro deste bloco
+        # Exemplo do que deve ficar aqui dentro:
+        self.enviar_para_narrador(historia) 
+        
+    # O loop do Tkinter continua rodando normalmente abaixo
+    self.after(1000, self.vigiar_roteiro)'''
+    
     
 def registrar(mensagem):
     hora_atual = datetime.now().strftime("%H:%M:%S")
