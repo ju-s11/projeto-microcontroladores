@@ -5,19 +5,45 @@ import json
 import os
 from Narracoes import GerenciadorDeVozes, TODAS_VOZES
 import threading
+import teste_ia
+import time
 
 estado_teatro = False
 motor = None
+historia = []
+ultima_data_json = 0
 
-historia = [
-            {"personagem": "Margaret Hamilton", "texto": "The interface is now controlling the theater!"},
-            {"personagem": "Isaac Newton", "texto": "Amazing! It actually works live."},
-            {"personagem": "Ada LoveLace", "texto": "Splendid! Everything is connected now."}
-        ]
+#funcoes
 
-indice_historia = 0
+def carregar_historia():
+    global historia
+    
+    if os.path.exists("historia.json"):
+        with open ("historia.json", "r", encoding="utf-8") as arquivo:
+            historia = json.load(arquivo)
+    else:
+        registrar("Nenhuma história encontrada")
+        historia = []
 
-#funcoes dos botoes
+def vigiar_roteiro():
+    global ultima_data_json, motor, estado_teatro
+    
+    if estado_teatro and os.path.exists("historia.json"):
+        data_atual = os.path.getmtime("historia.json")
+        
+        if data_atual > ultima_data_json:
+            ultima_data_json = data_atual
+            carregar_historia()
+            
+            if historia and motor:
+                registrar("Nova cena")
+                motor.parar_teatro()
+                time.sleep(0.5)
+                motor.cortar_cena=False
+                threading.Thread(target=motor.processar_mensagem, args=(historia, registrar), daemon=True).start()
+
+    janela.after(2000, vigiar_roteiro)
+    
 def registrar(mensagem):
     hora_atual = datetime.now().strftime("%H:%M:%S")
     caixa_deb.insert(tkinter.END, f"[{hora_atual}] {mensagem}\n")
@@ -30,9 +56,12 @@ def iniciar_teatro():
         registrar("Teatro Iniciado...")
         estado_teatro = True
         indice_historia = 0
+        ultima_data_json = 0
+        
+        threading.Thread(target=teste_ia.iniciar_loop_ia, daemon=True).start()
         
         config_vozes = {
-            "Ada LoveLace":{
+            "Ada Lovelace":{
                 "voz": TODAS_VOZES[voz_ada.get()],
                 "volume":vol_ada.get()/100,
                 "velocidade":100.0/vel_ada.get()
@@ -52,12 +81,6 @@ def iniciar_teatro():
         motor = GerenciadorDeVozes(config_vozes)
         motor.cortar_cena = False
     
-        def tarefa_thread():
-            global estado_teatro
-            motor.processar_mensagem(historia, registrar)
-            estado_teatro = False
-    
-        threading.Thread (target = tarefa_thread).start()
         
     else:
         registrar("Teatro interrompido.")
@@ -65,44 +88,7 @@ def iniciar_teatro():
         if motor:
             motor.parar_teatro()
 
-def prox_fala():
-    global motor, indice_historia
-    
-    if indice_historia >= len(historia):
-        registrar("Não há mais falas.")
-        return
-    
-    config_vozes = {
-        "Ada LoveLace":{
-            "voz": TODAS_VOZES[voz_ada.get()],
-            "volume":vol_ada.get()/100,
-            "velocidade":100.0/vel_ada.get()
-            },
-        "Margaret Hamilton": {
-            "voz": TODAS_VOZES[voz_marg.get()],
-            "volume":vol_marg.get()/100,
-            "velocidade":100.0/vel_marg.get()
-            },
-        "Isaac Newton": {
-            "voz": TODAS_VOZES[voz_isaac.get()],
-            "volume":vol_isaac.get()/100,
-            "velocidade":100.0/vel_isaac.get()
-            }
-        }
-    
-    
-    if motor is None:
-        motor = GerenciadorDeVozes(config_vozes)
-    
-    motor.cortar_cena = False
-    fala_atual = [historia[indice_historia]]
-    
-    def tarefa_thread():
-        global indice_historia
-        motor.processar_mensagem(fala_atual, registrar)
-        indice_historia += 1
-    
-    threading.Thread(target=tarefa_thread).start()
+
 
 def mudar_lua():
     registrar("Posição da Lua alterada")
@@ -218,7 +204,6 @@ frame.pack(pady=15, fill="x", padx=25)
 
 title_deb = tkinter.Label(frame, text="Debug:", font=("Arial", 9, "bold"))
 title_deb.place(relx=0.5, rely=0.5, anchor="center")
-tkinter.Button(frame, text="Próxima Fala", command=prox_fala, bg="lightgrey", font=("Arial", 10, "bold")).place(relx=1.0, rely=0.5, anchor="e")
 
 caixa_deb = tkinter.Text(aba_debug, height = 20, width = 70, bg = "black", fg="lime")
 caixa_deb.pack()
@@ -332,6 +317,8 @@ tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_co
 
 
 carregar_conf()
-
+vigiar_roteiro()
 janela.mainloop()
+
+
 
