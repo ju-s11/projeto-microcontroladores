@@ -46,17 +46,7 @@ def vigiar_roteiro():
                 threading.Thread(target=motor.processar_mensagem, args=(historia, registrar), daemon=True).start()
 
     janela.after(2000, vigiar_roteiro)
-    '''historia = carregar_historia()
-    
-    # Adicione a checagem aqui:
-    if historia is not None:
-        # Move todo o código que manda tocar o áudio para dentro deste bloco
-        # Exemplo do que deve ficar aqui dentro:
-        self.enviar_para_narrador(historia) 
-        
-    # O loop do Tkinter continua rodando normalmente abaixo
-    self.after(1000, self.vigiar_roteiro)'''
-    
+
     
 def registrar(mensagem):
     hora_atual = datetime.now().strftime("%H:%M:%S")
