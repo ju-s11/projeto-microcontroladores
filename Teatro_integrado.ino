@@ -6,6 +6,7 @@
 #define PINO_DADOS 7
 #define QTD_LEDS 11
 #define NUM_SERVOS 3
+#define NUM_REPETICOES_SERVO 5
 
 // LEDS
 
@@ -31,7 +32,7 @@ unsigned long intervalo = 100;
 ServoTimer2 servos[NUM_SERVOS];
 bool movendo[NUM_SERVOS] = {false, false, false};
 
-unsigned long ultimo_tempo[NUM_SERVOS];
+unsigned long ultimo_tempo[NUM_SERVOS] = {0, 0, 0};
 
 int etapa[NUM_SERVOS] = {0, 0, 0};
 int repeticoes[NUM_SERVOS] = {0, 0, 0};
@@ -50,7 +51,7 @@ int totalLinhas = 0;
 int linhaAtualScroll = 0;
 
 unsigned long ultimoTempoScroll = 0;
-const int velocidadeScroll = 1500;
+const int INTERVALO_SCROLL = 1500;
 
 int anguloParaMicros(int angulo) {
   return map(angulo, 0, 180, 750, 2250);
@@ -58,6 +59,10 @@ int anguloParaMicros(int angulo) {
 
 void subir(int id) {
   servos[id].write(anguloParaMicros(180));
+}
+
+void descer(int id) {
+  servos[id].write(anguloParaMicros(0));
 }
 
 void iniciar_mover(int id) {
@@ -87,15 +92,11 @@ void atualizar_mover(int id) {
 
       repeticoes[id]++;
 
-      if(repeticoes[id] >= 3) {
+      if(repeticoes[id] >= NUM_REPETICOES_SERVO) {
         movendo[id] = false;
       }
     }
   }
-}
-
-void descer(int id) {
-  servos[id].write(anguloParaMicros(0));
 }
 
 void quebrarTextoEmLinhas(String texto) {
@@ -426,7 +427,7 @@ void loop() {
   }
 
   if (totalLinhas > LINHAS_LCD) {
-    if (millis() - ultimoTempoScroll >= velocidadeScroll) {
+    if (millis() - ultimoTempoScroll >= INTERVALO_SCROLL) {
       ultimoTempoScroll = millis();
       
       linhaAtualScroll++;
