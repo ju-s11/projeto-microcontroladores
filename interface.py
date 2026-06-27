@@ -12,6 +12,10 @@ estado_teatro = False
 motor = None
 historia = []
 ultima_data_json = 0
+e_lua = False
+e_foguete = False
+e_prisma = False
+var_personagens = {}
 
 #funcoes
 
@@ -64,23 +68,13 @@ def iniciar_teatro():
         
         threading.Thread(target=teste_ia.iniciar_loop_ia, daemon=True).start()
         
-        config_vozes = {
-            "Ada Lovelace":{
-                "voz": TODAS_VOZES[voz_ada.get()],
-                "volume":vol_ada.get()/100,
-                "velocidade":100.0/vel_ada.get()
-                },
-            "Margaret Hamilton": {
-                "voz": TODAS_VOZES[voz_marg.get()],
-                "volume":vol_marg.get()/100,
-                "velocidade":100.0/vel_marg.get()
-                },
-            "Isaac Newton": {
-                "voz": TODAS_VOZES[voz_isaac.get()],
-                "volume":vol_isaac.get()/100,
-                "velocidade":100.0/vel_isaac.get()
-                }
-        }
+        config_vozes = {}
+        
+        for nome, variavel in var_personagens.items():
+            config_vozes[nome] = {
+                "voz": TODAS_VOZES[variaveis["voz"].get()],
+                "volume": variaveis["volume"].get() / 100,
+                "velocidade": 100.0 / variaveis["velocidade"].get()}
         
         motor = GerenciadorDeVozes(config_vozes)
         motor.cortar_cena = False
@@ -93,15 +87,70 @@ def iniciar_teatro():
             motor.parar_teatro()
 
 
+def atu_personagens (): #para colocar as configs dos personagens na interface
+    nomes_dig = nomes_personagens.get()
+    lista_nomes = []
+    for nome in nomes_dig.split(","):
+        nome.strip()
+        lista_nomes.append(nome.strip())
+    
+    for configuracao in aba_personagens.winfo_children():
+        configuracao.destroy()
 
+    var_personagens.clear()
+    
+    for nome in lista_nomes:
+        tkinter.Label(aba_personagens, text=nome, font=("Arial", 10, "bold")).pack(pady=10)
+        frame_p = tkinter.Frame(aba_personagens)
+        frame_p.pack(fill="x", padx=10)
+
+        voz_p = tkinter.StringVar(value = "Alba")
+        tkinter.OptionMenu(frame_p, voz_p, "Alba", "Amy", "Northern Male", "Alan").pack(side=tkinter.LEFT, padx=5)
+
+        vol_p = tkinter.Scale(frame_p, from_=0, to=100, orient=tkinter.HORIZONTAL, label = "Volume")
+        vol_p.set(80)
+        vol_p.pack(side=tkinter.LEFT, padx=5)
+
+        vel_p = tkinter.Scale(frame_p, from_=50, to=200, orient=tkinter.HORIZONTAL, label = "Velocidade")
+        vel_p.set(100)
+        vel_p.pack(side=tkinter.LEFT, padx=5)
+
+ 
+        var_personagens[nome]={
+            "voz": voz_p,
+            "volume": vol_p,
+            "velocidade": vel_p
+            }
+        
+    tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
+    registrar(f"Controles gerados para {lista_nomes}!")
+    
 def mudar_lua():
-    registrar("Posição da Lua alterada")
+    global e_lua
+    if e_lua == True:
+        e_lua = False
+        registrar("Lua: movimento interrompido")
+    else:
+        e_lua = True
+        registrar("Lua: movimento iniciado")
 
 def mudar_foguete():
-    registrar("Posição do Foguete alterada")
+    global e_foguete
+    if e_foguete == True:
+        e_foguete = False
+        registrar("Foguete: movimento interrompido")
+    else:
+        e_foguete = True
+        registrar("Foguete: movimento iniciado")
     
 def mudar_prisma():
-    registrar("Posição do Prisma alterada")
+    global e_prisma
+    if e_prisma == True:
+        e_prisma = False
+        registrar("Prisma: movimento interrompido")
+    else:
+        e_prisma = True
+        registrar("Prisma: movimento iniciado")
     
 def mudar_historia():
     clima_escolhido = clima.get()
@@ -111,26 +160,6 @@ def mudar_luz():
     luz_escolhido = luz.get()
     registrar(f"Luz do led alterada para: {luz_escolhido}")
     
-def mudar_ada():
-    v = vol_ada.get()
-    velocidade = vel_ada.get()
-    voz = voz_ada.get()
-    vel = velocidade/100
-    registrar(f"Ada: Volume = {v}\n		Velocidade = {vel}x\n		Voz = {voz}")
-
-def mudar_marg():
-    v = vol_marg.get()
-    velocidade = vel_marg.get()
-    voz = voz_marg.get()
-    vel = velocidade/100
-    registrar(f"Margaret: Volume = {v}\n		     Velocidade = {vel}x\n		     Voz = {voz}")
-
-def mudar_isaac():
-    v = vol_isaac.get()
-    velocidade = vel_isaac.get()
-    voz = voz_isaac.get()
-    vel = velocidade/100
-    registrar(f"Isaac: Volume = {v}\n		  Velocidade = {vel}x\n		  Voz = {voz}")
 
 def salvar_conf():
     dados_para_salvar = {
@@ -138,25 +167,17 @@ def salvar_conf():
             "clima": clima.get(),
             "luz": luz.get()
         },
-        "ada": {
-            "voz": voz_ada.get(),
-            "volume": vol_ada.get(),
-            "velocidade": vel_ada.get()
-        },
-        "margaret": {
-            "voz": voz_marg.get(),
-            "volume": vol_marg.get(),
-            "velocidade": vel_marg.get()
-        },
-        "isaac": {
-            "voz": voz_isaac.get(),
-            "volume": vol_isaac.get(),
-            "velocidade": vel_isaac.get()
-        }
+        "personagens": {}
     }
     
+    for nome, variaveis in var_personagens.items():
+        dados_para_salvar["personagens"][nome] = {
+            "voz": variaveis["voz"].get(),
+            "volume": variaveis["volume"].get(),
+            "velocidade": variaveis["velocidade"].get()} 
+        
     with open("memoria_teatro.json", "w", encoding="utf-8") as arquivo:
-        json.dump(dados_para_salvar, arquivo, indent=4)
+        json.dump(dados_para_salvar, arquivo, indent=4, ensure_ascii=False)
         
     registrar("Configurações salvas com sucesso!")
 
@@ -169,17 +190,17 @@ def carregar_conf():
             clima.set(dados["cenario"]["clima"])
             luz.set(dados["cenario"]["luz"])
             
-            voz_ada.set(dados["ada"]["voz"])
-            vol_ada.set(dados["ada"]["volume"])
-            vel_ada.set(dados["ada"]["velocidade"])
+            if "personagens" in dados:
+                nomes_salvos = list(dados["personagens"].keys())
+                if nomes_salvos:
+                    nomes_personagens.set(",".join(nomes_salvos))
+                    atu_personagens()
             
-            voz_marg.set(dados["margaret"]["voz"])
-            vol_marg.set(dados["margaret"]["volume"])
-            vel_marg.set(dados["margaret"]["velocidade"])
-            
-            voz_isaac.set(dados["isaac"]["voz"])
-            vol_isaac.set(dados["isaac"]["volume"])
-            vel_isaac.set(dados["isaac"]["velocidade"])
+                for nome, config in dados["personagens"].items():
+                    if nome in var_personagens:
+                        var_personagens[nome]["voz"].set(dados["personagens"][nome]["voz"])
+                        var_personagens[nome]["volume"].set(dados["personagens"][nome]["volume"])
+                        var_personagens[nome]["velocidade"].set(dados["personagens"][nome]["velocidade"])
             
             registrar("Configurações anteriores carregadas!")
 
@@ -187,7 +208,7 @@ def carregar_conf():
 #janela principal
 janela = tkinter.Tk()
 janela.title("Configurações + Debug")
-janela.geometry("600x500")
+janela.geometry("600x550")
 
 abas = ttk.Notebook(janela)
 abas.pack(pady=10, fill="both", expand=True)
@@ -242,11 +263,17 @@ tkinter.Button(frame4, text="Esconder/Mostrar Prisma",command = mudar_prisma).pa
 frame5 = tkinter.Frame(aba_cenario)
 frame5.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
 tkinter.Label(frame5, text="Controle do Clima da História:").pack(side=tkinter.LEFT)
-clima = tkinter.StringVar()
-clima.set("Alegre")
-menu_clima=tkinter.OptionMenu(frame5, clima, "Alegre", "Triste", "Engraçada", "Assustadora")
-menu_clima.pack(side=tkinter.LEFT, padx=5)
+clima= tkinter.StringVar()
+tkinter.Entry(frame5, textvariable = clima, width=40).pack(side=tkinter.LEFT, padx = 5)
 tkinter.Button(frame5, text="Aplicar", command=mudar_historia).pack(side=tkinter.LEFT, padx=5)
+
+framep = tkinter.Frame(aba_cenario)
+framep.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
+tkinter.Label(framep, text="Nome dos personagens:").pack(side=tkinter.LEFT)
+nomes_personagens= tkinter.StringVar()
+tkinter.Entry(framep, textvariable = nomes_personagens, width=40).pack(side=tkinter.LEFT, padx = 5)
+tkinter.Button(framep, text="Aplicar", command=atu_personagens).pack(side=tkinter.LEFT, padx=5)
+
 
 frame6 = tkinter.Frame(aba_cenario)
 frame6.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
@@ -261,61 +288,6 @@ tkinter.Button(aba_cenario, text="Salvar Configurações", command=salvar_conf, 
 
 
 #configuração dos personagens
-tkinter.Label(aba_personagens, text="Ada Lovelace", font=("Arial", 10, "bold")).pack(pady=10)
-frame_ada = tkinter.Frame(aba_personagens)
-frame_ada.pack(fill="x", padx=10)
-
-voz_ada = tkinter.StringVar(value = "Alba")
-tkinter.OptionMenu(frame_ada, voz_ada, "Alba", "Amy", "Northern Male", "Alan").pack(side=tkinter.LEFT, padx=5)
-
-vol_ada = tkinter.Scale(frame_ada, from_=0, to=100, orient=tkinter.HORIZONTAL, label = "Volume")
-vol_ada.set(80)
-vol_ada.pack(side=tkinter.LEFT, padx=5)
-
-vel_ada = tkinter.Scale(frame_ada, from_=50, to=200, orient=tkinter.HORIZONTAL, label = "Velocidade")
-vel_ada.set(100)
-vel_ada.pack(side=tkinter.LEFT, padx=5)
-
-tkinter.Button(frame_ada, text="Aplicar", command=mudar_ada).pack(side=tkinter.LEFT, padx=10)
-
-
-
-tkinter.Label(aba_personagens, text="Margaret Hamilton", font=("Arial", 10, "bold")).pack(pady=10)
-frame_marg = tkinter.Frame(aba_personagens)
-frame_marg.pack(fill="x", padx=10)
-
-voz_marg = tkinter.StringVar(value = "Amy")
-tkinter.OptionMenu(frame_marg, voz_marg, "Alba", "Amy", "Northern Male", "Alan").pack(side=tkinter.LEFT, padx=5)
-
-vol_marg = tkinter.Scale(frame_marg, from_=0, to=100, orient=tkinter.HORIZONTAL, label = "Volume")
-vol_marg.set(80)
-vol_marg.pack(side=tkinter.LEFT, padx=5)
-
-vel_marg = tkinter.Scale(frame_marg, from_=50, to=200, orient=tkinter.HORIZONTAL, label = "Velocidade")
-vel_marg.set(100)
-vel_marg.pack(side=tkinter.LEFT, padx=5)
-
-tkinter.Button(frame_marg, text="Aplicar", command=mudar_marg).pack(side=tkinter.LEFT, padx=10)
-
-
-
-tkinter.Label(aba_personagens, text="Isaac Newton", font=("Arial", 10, "bold")).pack(pady=10)
-frame_isaac = tkinter.Frame(aba_personagens)
-frame_isaac.pack(fill="x", padx=10)
-
-voz_isaac = tkinter.StringVar(value = "Northern Male")
-tkinter.OptionMenu(frame_isaac, voz_isaac, "Alba", "Amy", "Northern Male", "Alan").pack(side=tkinter.LEFT, padx=5)
-
-vol_isaac = tkinter.Scale(frame_isaac, from_=0, to=100, orient=tkinter.HORIZONTAL, label = "Volume")
-vol_isaac.set(80)
-vol_isaac.pack(side=tkinter.LEFT, padx=5)
-
-vel_isaac = tkinter.Scale(frame_isaac, from_=50, to=200, orient=tkinter.HORIZONTAL, label = "Velocidade")
-vel_isaac.set(100)
-vel_isaac.pack(side=tkinter.LEFT, padx=5)
-
-tkinter.Button(frame_isaac, text="Aplicar", command=mudar_isaac).pack(side=tkinter.LEFT, padx=10)
-
 
 tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
 
@@ -323,6 +295,7 @@ tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_co
 carregar_conf()
 vigiar_roteiro()
 janela.mainloop()
+
 
 
 
