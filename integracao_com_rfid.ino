@@ -28,7 +28,7 @@ String UID_LOVELACE = "0ED93202";  // UID da tag da Ada Lovelace
 String UID_HAMILTON = "A3A6DBE4";  // UID da tag da Margaret Hamilton
 
 unsigned long tempoAnteriorRfid = 0;
-unsigned long intervaloRfid = 1000;
+unsigned long intervaloRfid = 2000;
 
 // LEDS
 
