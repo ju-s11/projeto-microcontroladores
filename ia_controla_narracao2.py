@@ -6,8 +6,9 @@ from smolagents import CodeAgent, InferenceClientModel, tool
 
 ultimo_estado_palco = ""
 ultima_historia = ""
+teatro_ligado = True
 
-token = "ADD_TOKEN"
+token = "SEU TOKEN"
 
 '''
 modelo = TransformersModel(
@@ -39,7 +40,11 @@ def verificar_palco() -> str:
     Returns:
         str: Uma lista ou nome dos cientistas presentes no suporte.
     """
-    global ultimo_estado_palco 
+    global ultimo_estado_palco, teatro_ligado
+    
+    if not teatro_ligado:
+        import sys
+        sys.exit()
     
     #Se a interface do audio estiver tocando, não faz nada
     if os.path.exists("narracao.txt"):
@@ -184,7 +189,7 @@ tools = [verificar_palco, mover_elemento, acender_led, narrar, salvar_historia]
 agent = CodeAgent(
     tools = tools,
     model = modelo,
-    additional_authorized_imports=["random"]
+    additional_authorized_imports=["random", "time"]
 )
 
 prompt = """
@@ -208,5 +213,6 @@ Formate o resultado como uma lista de dicionários com as chaves "personagem" (n
 def iniciar_loop_ia():
     agent.run(prompt)
             
+
 
 
