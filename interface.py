@@ -309,7 +309,7 @@ frame6.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
 tkinter.Label(frame6, text="Controle da Luz:").pack(side=tkinter.LEFT)
 luz = tkinter.StringVar()
 luz.set("Off")
-menu_luz=tkinter.OptionMenu(frame6, luz, "OFF", "White", "Fogo", "Espectro", "Dispersão de luz branca", "Cálculo em loop", "Fluxo de dados", "Decolagem do foguete")
+menu_luz=tkinter.OptionMenu(frame6, luz, "OFF", "Branco", "Fogo", "Espectro", "Dispersão de luz branca", "Cálculo em loop", "Fluxo de dados", "Decolagem do foguete", "Respirar")
 menu_luz.pack(side=tkinter.LEFT, padx=5)
 tkinter.Button(frame6, text="Aplicar", command=mudar_luz).pack(side=tkinter.LEFT, padx=5)
 
