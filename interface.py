@@ -12,9 +12,12 @@ estado_teatro = False
 motor = None
 historia = []
 ultima_data_json = 0
+thread_ia = None
+
 e_lua = False
 e_foguete = False
 e_prisma = False
+
 var_personagens = {}
 
 #funcoes
@@ -32,6 +35,13 @@ def carregar_historia():
         # Se o arquivo estiver sendo escrito pela IA, ignora esse frame e espera o próximo
         return None
 
+def tocar_cena():
+    motor.parar_teatro()
+    time.sleep(0.5)
+    motor.cortar_cena = False
+    motor.processar_mensagem(historia, registrar)
+    print("tocando cena")
+
 def vigiar_roteiro():
     global ultima_data_json, motor, estado_teatro
     
@@ -44,33 +54,41 @@ def vigiar_roteiro():
             
             if historia and motor:
                 registrar("Nova cena")
-                motor.parar_teatro()
-                time.sleep(0.5)
-                motor.cortar_cena=False
-                threading.Thread(target=motor.processar_mensagem, args=(historia, registrar), daemon=True).start()
+                threading.Thread(target=tocar_cena, daemon=True).start()
 
     janela.after(2000, vigiar_roteiro)
 
-    
+ 
+ 
 def registrar(mensagem):
     hora_atual = datetime.now().strftime("%H:%M:%S")
     caixa_deb.insert(tkinter.END, f"[{hora_atual}] {mensagem}\n")
     caixa_deb.see(tkinter.END)
 
+
+
+
 def iniciar_teatro():
-    global estado_teatro, motor, indice_historia
+    global estado_teatro, motor, ultima_data_json, thread_ia
     
     if estado_teatro == False:
+        
+        if thread_ia is not None and thread_ia.is_alive():
+            registrar("Ia encerrando a ultima cena.")
+            return
+        
         registrar("Teatro Iniciado...")
         estado_teatro = True
-        indice_historia = 0
         ultima_data_json = 0
         
-        threading.Thread(target=teste_ia.iniciar_loop_ia, daemon=True).start()
+        teste_ia.teatro_ligado = True
+        thread_ia = threading.Thread(target=teste_ia.iniciar_loop_ia, daemon=True)
+        thread_ia.start()
+        
         
         config_vozes = {}
         
-        for nome, variavel in var_personagens.items():
+        for nome, variaveis in var_personagens.items():
             config_vozes[nome] = {
                 "voz": TODAS_VOZES[variaveis["voz"].get()],
                 "volume": variaveis["volume"].get() / 100,
@@ -83,15 +101,17 @@ def iniciar_teatro():
     else:
         registrar("Teatro interrompido.")
         estado_teatro = False
+        teste_ia.teatro_ligado = False
         if motor:
             motor.parar_teatro()
+        
+
 
 
 def atu_personagens (): #para colocar as configs dos personagens na interface
     nomes_dig = nomes_personagens.get()
     lista_nomes = []
     for nome in nomes_dig.split(","):
-        nome.strip()
         lista_nomes.append(nome.strip())
     
     for configuracao in aba_personagens.winfo_children():
@@ -124,7 +144,10 @@ def atu_personagens (): #para colocar as configs dos personagens na interface
         
     tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
     registrar(f"Controles gerados para {lista_nomes}!")
-    
+
+
+
+
 def mudar_lua():
     global e_lua
     if e_lua == True:
@@ -161,6 +184,9 @@ def mudar_luz():
     registrar(f"Luz do led alterada para: {luz_escolhido}")
     
 
+
+
+
 def salvar_conf():
     dados_para_salvar = {
         "cenario": {
@@ -187,8 +213,8 @@ def carregar_conf():
         with open("memoria_teatro.json", "r", encoding="utf-8") as arquivo:
             dados = json.load(arquivo)
             
-            clima.set(dados["cenario"]["clima"])
-            luz.set(dados["cenario"]["luz"])
+            clima.set(dados.get("cenario", {}).get("clima", ""))
+            luz.set(dados.get("cenario", {}).get("luz", "OFF"))
             
             if "personagens" in dados:
                 nomes_salvos = list(dados["personagens"].keys())
@@ -203,6 +229,9 @@ def carregar_conf():
                         var_personagens[nome]["velocidade"].set(dados["personagens"][nome]["velocidade"])
             
             registrar("Configurações anteriores carregadas!")
+
+
+
 
 
 #janela principal
@@ -285,17 +314,9 @@ menu_luz.pack(side=tkinter.LEFT, padx=5)
 tkinter.Button(frame6, text="Aplicar", command=mudar_luz).pack(side=tkinter.LEFT, padx=5)
 
 tkinter.Button(aba_cenario, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
-
-
-#configuração dos personagens
-
 tkinter.Button(aba_personagens, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
 
 
 carregar_conf()
 vigiar_roteiro()
 janela.mainloop()
-
-
-
-
