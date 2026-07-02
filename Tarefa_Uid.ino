@@ -7,15 +7,19 @@
 #define SS_2 49
 #define RST_2 6
 
+#define SS_3 48
+#define RST_3 8
+
 MFRC522 leitor1(SS_1, RST_1);
 MFRC522 leitor2(SS_2, RST_2);
-
+MFRC522 leitor3(SS_3, RST_3);
 
 void setup() {
   Serial.begin(9600);
   SPI.begin();
   leitor1.PCD_Init();
   leitor2.PCD_Init();
+  leitor3.PCD_Init();
   Serial.println("Aproxime uma tag de cada leitor para ver o UID:");
 
 }
@@ -55,5 +59,22 @@ void loop() {
     Serial.print("Leitor 2 UID: ");
     Serial.println(uid);
     leitor2.PICC_HaltA();
+  }
+}
+
+ if (leitor3.PICC_IsNewCardPresent() && leitor3.PICC_ReadCardSerial()) {
+    String uid = "";
+
+    for (byte i = 0; i < leitor3.uid.size; i++) {
+      if (leitor3.uid.uidByte[i] < 0x10) {
+        uid = uid + "0";
+      }
+      uid = uid + String(leitor3.uid.uidByte[i], HEX);
+    }
+
+    uid.toUpperCase();
+    Serial.print("Leitor 3 UID: ");
+    Serial.println(uid);
+    leitor3.PICC_HaltA();
   }
 }
