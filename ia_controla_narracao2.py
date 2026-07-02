@@ -5,7 +5,8 @@ import arduino
 '''
 TO-DO:
 - melhorar o prompt para gerar dialogos diferentes
-- ajeitar as vozes que nao estao sendo salvas
+- ajeitar as vozes que nao estao sendo salvas na memoria ao reiniciar o teatro
+- dar um jeito de quebrar o loop eterno da IA pra fechar o programa
 '''
 
 SERVOS = {"prisma": 1, "foguete": 2, "lua": 3}
@@ -211,6 +212,7 @@ def salvar_historia(historia: list) -> str:
 
     return "História salva com sucesso."
 
+
 def carregar_informacoes_teatro():
     caminho_arquivo = "memoria_teatro.json"
     if os.path.exists(caminho_arquivo):
@@ -241,7 +243,7 @@ mova os elementos cenográficos correspondentes e mude a cor da iluminação em 
 
 Exerça seu papel de roteirista apenas quando novos personagens forem detectados, crie uma lista 'historia' totalmente nova e limpa do zero para aquela rodada específica.
 Percorra os personagens detectados usando um laço "for" comum e gere o roteiro, em ingles, diretamente dentro dele (proibido usar "if/elif" para nomes fixos ou criar subfunções). 
-Para cada personagem, escreva manualmente um texto inédito em inglês 
+Para cada personagem, escreva manualmente um texto inédito em inglês, se tiver mais de um personagem em cena escreva um diálogo
 
 Formate o resultado como uma lista de dicionários com as chaves "personagem" (nome exato) e "texto" (apenas a fala limpa). Envie essa lista ('historia') como argumento para salvar_historia(historia) e narrar(historia), faça uma pausa de alguns segundos e reinicie o loop. 
 Mantenha-se vigiando o palco para sempre.
@@ -267,12 +269,12 @@ def iniciar_loop_ia():
 
     DIRETRIZES ADICIONAIS DO DIRETOR:
     - O clima da história deve ser: {clima}.
-    - O tema geral do teateo deve ser focado em: {tema}.
+    - O tema geral do teatro deve ser focado em: {tema}.
     - Os personagens que podem aparecer no palco são: {personagens}. 
     
     Por favor, incorpore o tema '{tema}' e o clima '{clima}' em todos os roteiros gerados.
     """
-    agent.run(prompt)
+    agent.run(prompt_dinamico)
             
 
 
