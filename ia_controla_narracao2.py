@@ -1,6 +1,9 @@
 import json, os, time
 from smolagents import CodeAgent, InferenceClientModel, tool
+import arduino
 
+SERVOS = {"prisma": 1, "foguete": 2, "lua": 3}
+EFEITOS_VALIDOS = ["apagar", "branco", "fogo", "espectro", "dispersao", "dados", "calculo", "decolagem", "respirar"]
 
 #os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 
@@ -70,41 +73,61 @@ def verificar_palco() -> str:
         return "Sem mudanças"
 
 @tool
-def mover_elemento(elemento: str, angulo: int) -> str:
+def mover_elemento(elemento: str, acao: str) -> str:
     """
-    Move um ou mais elementos do cenário.
-    Elementos disponíveis: prisma, foguete, lua, computador
+    Move um elemento do cenario, subindo ou descendo ele.
+    Elementos disponiveis: prisma, foguete, lua.
+    Acoes disponiveis: 'subir' (mostra o elemento) ou 'descer' (esconde o elemento) ou 'mover' (varia a posicao do servo).
+
+    Quando um cientista entra em cena, suba o elemento dele.
+    Quando um cientista sai de cena, desca o elemento dele antes de subir o do proximo.
     
     Args:
         elemento: O nome do objeto/cenário que deve ser movido (ex: 'prisma').
-        angulo: O ângulo de rotação para o servo motor (de 0 a 180 graus).
+        acao: 'subir' ou 'descer' ou 'mover'.
     Returns:
         str: Confirmação do movimento do elemento.
     """
-    comando = f"MOVER_SERVO:{elemento}:{angulo}"
-    print(f"[PSEUDOCOMANDO] {comando}")
+
+    numero = SERVOS[elemento]
+    comando = f"servo {numero} {acao}"
+    arduino.enviar(comando)
+    return f"Servo do(a) {elemento} executou: {acao}"
+
+    ##comando = f"MOVER_SERVO:{elemento}:{angulo}"
+    ##print(f"[PSEUDOCOMANDO] {comando}")
 
     ## Aqui seria a integraçao com o codigo da Julia
 
-    return f"Servo do(a) {elemento} movido para {angulo} graus"
+    ##return f"Servo do(a) {elemento} movido para {angulo} graus"
 
 
 @tool
-def acender_led(cor: str) -> str:
+def acender_led(efeito: str) -> str:
     """
-    Envia um comando para acender o LED específico do cenário.
-    Se houver 2 ou mais cientistas, acende o LED  'amarelo' (indicando crossover).
-    Cores disponíveis: vermelho, amarelo, verde, azul
+    Muda o efeito de luz da fita de LED do cenario.
+    Efeitos disponiveis: apagar, branco, fogo, espectro, dispersao, dados, calculo, decolagem, respirar.
+
+    Escolha o efeito que combina com o cientista em cena
+    (ex: 'dispersao' para Newton e a luz/prisma, 'decolagem' para foguetes, 'dados' ou 'calculo' para computacao).
     
     Args:
-        cor: A cor desejada para o LED (exemplos: 'branca', 'vermelha', 'azul').
+        efeito: O nome do efeito de luz (ex: 'espectro', 'dispersao', 'fogo').
     Returns:
         str: Confirmação do comando enviado ao hardware.
     """
+
+    if efeito not in EFEITOS_VALIDOS:
+        return f"Efeito '{efeito}' invalido. Use um destes: {EFEITOS_VALIDOS}"
+    
+    comando = f"led {efeito} 40"
+    arduino.enviar(comando)
+    return f"Efeito de LED alterado para: {efeito}"
+
     #print(f"[COMANDO HARDWARE] LED alterado para a cor: {cor}")
-    comando = f"Acende LED da cor:{cor}"
-    print(f"[PSEUDOCOMANDO] {comando}")
-    return f"Acende LED da cor {cor}"
+    #comando = f"Acende LED da cor:{cor}"
+    #print(f"[PSEUDOCOMANDO] {comando}")
+    #return f"Acende LED da cor {cor}"
 
 
 @tool
@@ -200,7 +223,9 @@ A cada poucos segundos, utilize a ferramenta de verificação para saber quem es
 Se o retorno for 'Sem mudanças', simplesmente aguarde um momento usando uma pausa e verifique novamente, sem realizar nenhuma outra ação.
 
 Quando novos cientistas entrarem, assuma o controle físico do teatro: 
-mova os elementos cenográficos correspondentes e mude a cor da iluminação em LED para cada um deles. 
+Comece descendo os elementos dos cientistas que saíram de cena (aqueles que estavam presentes antes e não estão mais), usando mover_elemento com a ação 'descer'.
+Depois, suba os elementos dos cientistas que entraram com a ação 'subir', lembrando que o prisma representa temas de luz e óptica, o foguete representa temas espaciais e a lua representa astronomia.
+Complete a ambientação escolhendo um efeito de luz com acender_led que combine com o cientista em cena, como 'dispersao' para Isaac Newton, 'decolagem' para o foguete de Margaret Hamilton, ou 'dados' e 'calculo' para a computação de Ada Lovelace.
 
 Exerça seu papel de roteirista apenas quando novos cientistas forem detectados, crie uma lista 'historia' totalmente nova e limpa do zero para aquela rodada específica.
 Percorra os cientistas detectados usando um laço "for" comum e gere o roteiro, em ingles, diretamente dentro dele (proibido usar "if/elif" para nomes fixos ou criar subfunções). 
