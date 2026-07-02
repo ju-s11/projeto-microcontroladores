@@ -17,6 +17,9 @@ MFRC522 leitor3(SS_3, RST_3);
 String UID_NEWTON = "03A4699A";  // UID da tag do Isaac Newton
 String UID_LOVELACE = "0ED93202";  // UID da tag da Ada Lovelace
 String UID_HAMILTON = "A3A6DBE4";  // UID da tag da Margaret Hamilton
+String UID_EINSTEIN = "E3E5689A";
+String UID_CURIE = "FC0C3302";
+String UID_LATTES = "D0A04A10";
 
 unsigned long tempoAnterior = 0;
 unsigned long intervalo = 1000;
@@ -54,6 +57,15 @@ String qualPersonagem(String uid) {
   }
   else if (uid == UID_HAMILTON) {
     return "Margaret Hamilton";
+  }
+  else if (uid == UID_EINSTEIN) {
+    return "Albert Einstein";
+  }
+  else if (uid == UID_CURIE) {
+    return "Marie Curie";
+  }
+  else if (uid == UID_LATTES) {
+    return "César Lattes";
   }
   else {
     return "desconhecida";
