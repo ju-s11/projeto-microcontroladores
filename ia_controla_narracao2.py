@@ -2,6 +2,12 @@ import json, os, time
 from smolagents import CodeAgent, InferenceClientModel, tool
 import arduino
 
+'''
+TO-DO:
+- melhorar o prompt para gerar dialogos diferentes
+- ajeitar as vozes que nao estao sendo salvas
+'''
+
 SERVOS = {"prisma": 1, "foguete": 2, "lua": 3}
 EFEITOS_VALIDOS = ["apagar", "branco", "fogo", "espectro", "dispersao", "dados", "calculo", "decolagem", "respirar"]
 
@@ -11,7 +17,7 @@ ultimo_estado_palco = ""
 ultima_historia = ""
 teatro_ligado = True
 
-token = "SEU TOKEN"
+token = ""
 
 '''
 modelo = TransformersModel(
@@ -27,8 +33,8 @@ modelo = LiteLLMModel(
 '''
 modelo = InferenceClientModel(
     token=token,
-    #model_id = "Qwen/Qwen2.5-7B-Instruct"
-    model_id = "meta-llama/Llama-3.1-8B-Instruct"
+    model_id = "Qwen/Qwen2.5-7B-Instruct"
+    #model_id = "meta-llama/Llama-3.1-8B-Instruct"
     )
 
 @tool
@@ -205,6 +211,14 @@ def salvar_historia(historia: list) -> str:
 
     return "História salva com sucesso."
 
+def carregar_informacoes_teatro():
+    caminho_arquivo = "memoria_teatro.json"
+    if os.path.exists(caminho_arquivo):
+        with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
+            return json.load(arquivo)
+    return None
+            
+
 
 tools = [verificar_palco, mover_elemento, acender_led, narrar, salvar_historia]
 
@@ -216,26 +230,48 @@ agent = CodeAgent(
 )
 
 prompt = """
-Você é o diretor e o roteirista criativo do teatro científico automatizado. 
-Sua missão é monitorar o palco por tempo indeterminado e dar vida aos cientistas que aparecerem através de roteiros teatrais lúdicos.
+Você é o diretor e o roteirista criativo do teatro automatizado. 
+Sua missão é monitorar o palco por tempo indeterminado e dar vida aos personagens que aparecerem através de roteiros teatrais lúdicos.
 Fique de olho no palco constantemente. 
 A cada poucos segundos, utilize a ferramenta de verificação para saber quem está em cena. 
 Se o retorno for 'Sem mudanças', simplesmente aguarde um momento usando uma pausa e verifique novamente, sem realizar nenhuma outra ação.
 
-Quando novos cientistas entrarem, assuma o controle físico do teatro: 
-Comece descendo os elementos dos cientistas que saíram de cena (aqueles que estavam presentes antes e não estão mais), usando mover_elemento com a ação 'descer'.
-Depois, suba os elementos dos cientistas que entraram com a ação 'subir', lembrando que o prisma representa temas de luz e óptica, o foguete representa temas espaciais e a lua representa astronomia.
-Complete a ambientação escolhendo um efeito de luz com acender_led que combine com o cientista em cena, como 'dispersao' para Isaac Newton, 'decolagem' para o foguete de Margaret Hamilton, ou 'dados' e 'calculo' para a computação de Ada Lovelace.
+Quando novos personagens entrarem em cena, assuma o controle físico do teatro: 
+mova os elementos cenográficos correspondentes e mude a cor da iluminação em LED para cada um deles. 
 
-Exerça seu papel de roteirista apenas quando novos cientistas forem detectados, crie uma lista 'historia' totalmente nova e limpa do zero para aquela rodada específica.
-Percorra os cientistas detectados usando um laço "for" comum e gere o roteiro, em ingles, diretamente dentro dele (proibido usar "if/elif" para nomes fixos ou criar subfunções). 
-Para cada cientista, escreva manualmente um texto inédito em inglês e em primeira pessoa ("I", "My", "We") sobre suas conquistas reais. 
+Exerça seu papel de roteirista apenas quando novos personagens forem detectados, crie uma lista 'historia' totalmente nova e limpa do zero para aquela rodada específica.
+Percorra os personagens detectados usando um laço "for" comum e gere o roteiro, em ingles, diretamente dentro dele (proibido usar "if/elif" para nomes fixos ou criar subfunções). 
+Para cada personagem, escreva manualmente um texto inédito em inglês 
 
-Formate o resultado como uma lista de dicionários com as chaves "personagem" (nome exato) e "texto" (apenas a fala limpa). Envie essa lista ('historia') como argumento para salvar_historia(historia) e narrar(historia), faça uma pausa de alguns segundos e reinicie o loop. Mantenha-se vigiando o palco para sempre.
+Formate o resultado como uma lista de dicionários com as chaves "personagem" (nome exato) e "texto" (apenas a fala limpa). Envie essa lista ('historia') como argumento para salvar_historia(historia) e narrar(historia), faça uma pausa de alguns segundos e reinicie o loop. 
+Mantenha-se vigiando o palco para sempre.
 
 """
 
 def iniciar_loop_ia():
+    config = carregar_informacoes_teatro()
+    #Valores padrão
+    clima = "neutro"
+    tema = "ciência"
+    personagens = "cientistas gerais"
+
+    if config:
+        if "cenario" in config:
+            clima = config["cenario"].get("clima", "neutro")
+            tema = config["cenario"].get("tema", "ciência")
+        if "personagens" in config:
+            personagens = ", ".join(config["personagens"].keys())
+
+    prompt_dinamico = f"""
+    {prompt}
+
+    DIRETRIZES ADICIONAIS DO DIRETOR:
+    - O clima da história deve ser: {clima}.
+    - O tema geral do teateo deve ser focado em: {tema}.
+    - Os personagens que podem aparecer no palco são: {personagens}. 
+    
+    Por favor, incorpore o tema '{tema}' e o clima '{clima}' em todos os roteiros gerados.
+    """
     agent.run(prompt)
             
 

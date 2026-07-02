@@ -7,7 +7,7 @@ from narracoes import GerenciadorDeVozes, TODAS_VOZES
 import threading
 import ia_controla_narracao2 as teste_ia 
 import time
-import arduino
+#import arduino
 import ponte_rfid
 
 estado_teatro = False
@@ -200,6 +200,10 @@ def mudar_prisma():
 def mudar_historia():
     clima_escolhido = clima.get()
     registrar(f"Teor da História alterada para: {clima_escolhido}")
+
+def mudar_tema():
+    tema_escolhido = tema.get()
+    registrar(f"Tema da Historia alterada para: {tema_escolhido}")
     
 def mudar_luz():
     luz_escolhido = luz.get()
@@ -219,7 +223,8 @@ def salvar_conf():
     dados_para_salvar = {
         "cenario": {
             "clima": clima.get(),
-            "luz": luz.get()
+            "luz": luz.get(),
+            "tema": tema.get()
         },
         "personagens": {}
     }
@@ -243,6 +248,7 @@ def carregar_conf():
             
             clima.set(dados.get("cenario", {}).get("clima", ""))
             luz.set(dados.get("cenario", {}).get("luz", "OFF"))
+            tema.set(dados.get("cenario", {}).get("tema", ""))
             
             if "personagens" in dados:
                 nomes_salvos = list(dados["personagens"].keys())
@@ -265,7 +271,7 @@ def carregar_conf():
 #janela principal
 janela = tkinter.Tk()
 janela.title("Configurações + Debug")
-janela.geometry("600x550")
+janela.geometry("600x600")
 
 abas = ttk.Notebook(janela)
 abas.pack(pady=10, fill="both", expand=True)
@@ -323,6 +329,14 @@ tkinter.Label(frame5, text="Controle do Clima da História:").pack(side=tkinter.
 clima= tkinter.StringVar()
 tkinter.Entry(frame5, textvariable = clima, width=40).pack(side=tkinter.LEFT, padx = 5)
 tkinter.Button(frame5, text="Aplicar", command=mudar_historia).pack(side=tkinter.LEFT, padx=5)
+
+frame7 = tkinter.Frame(aba_cenario)
+frame7.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
+tkinter.Label(frame7, text="Tema da História:").pack(side=tkinter.LEFT)
+tema= tkinter.StringVar()
+tkinter.Entry(frame7, textvariable = tema, width=40).pack(side=tkinter.LEFT, padx = 5)
+tkinter.Button(frame7, text="Aplicar", command=mudar_tema).pack(side=tkinter.LEFT, padx=5)
+
 
 framep = tkinter.Frame(aba_cenario)
 framep.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
