@@ -16,7 +16,7 @@ ultimo_estado_palco = ""
 ultima_historia = ""
 teatro_ligado = True
 
-token = "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"
+token = "SEU TOKEN"
 
 '''
 modelo = TransformersModel(
@@ -81,7 +81,11 @@ def verificar_palco() -> str:
 def mover_elemento(elemento: str, acao: str) -> str:
     """
     Move um elemento do cenario, subindo ou descendo ele.
-    Elementos disponiveis: prisma, foguete, lua.
+    Alguns elementos disponiveis e seus servos:
+    Servo 1 - Lua 
+    Servo 2 - Foguete
+    Servo 3 - Prisma
+    Para os outros personagens deixe os servos parados.
     Acoes disponiveis: 'subir' (mostra o elemento) ou 'descer' (esconde o elemento) ou 'mover' (varia a posicao do servo).
 
     Quando um cientista entra em cena, suba o elemento dele.
@@ -96,6 +100,7 @@ def mover_elemento(elemento: str, acao: str) -> str:
 
     numero = SERVOS[elemento]
     comando = f"servo {numero} {acao}"
+    print(f" [DEBUG SERVO] IA mandando: {comando}")
     arduino.enviar(comando)
     return f"Servo do(a) {elemento} executou: {acao}"
 
@@ -113,8 +118,8 @@ def acender_led(efeito: str) -> str:
     Muda o efeito de luz da fita de LED do cenario.
     Efeitos disponiveis: apagar, branco, fogo, espectro, dispersao, dados, calculo, decolagem, respirar.
 
-    Escolha o efeito que combina com o cientista em cena
-    (ex: 'dispersao' para Newton e a luz/prisma, 'decolagem' para foguetes, 'dados' ou 'calculo' para computacao).
+    Para todo personagem escolha o efeito que combina com ele
+    (exemplo: 'dispersao' para Newton e a luz/prisma, 'decolagem' para foguetes, 'dados' ou 'calculo' para computacao). Ou seja, associe cada fenômeno dos leds aos seus respectivos personagens
     
     Args:
         efeito: O nome do efeito de luz (ex: 'espectro', 'dispersao', 'fogo').
@@ -277,6 +282,3 @@ def iniciar_loop_ia():
     """
     agent.run(prompt_dinamico)
             
-
-
-
