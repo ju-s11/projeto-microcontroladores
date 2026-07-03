@@ -7,6 +7,8 @@ from narracoes import GerenciadorDeVozes, TODAS_VOZES
 import threading
 import ia_controla_narracao2 as teste_ia 
 import time
+#import arduino
+import ponte_rfid
 
 estado_teatro = False
 motor = None
@@ -19,6 +21,18 @@ e_foguete = False
 e_prisma = False
 
 var_personagens = {}
+
+LUZES = {
+    "OFF": "apagar",
+    "Branco": "branco",
+    "Fogo": "fogo",
+    "Espectro": "espectro",
+    "Dispersão de luz branca": "dispersao",
+    "Cálculo em loop": "calculo",
+    "Fluxo de dados": "dados",
+    "Decolagem do foguete": "decolagem",
+    "Respirar": "respirar"
+}
 
 #funcoes
 
@@ -84,6 +98,8 @@ def iniciar_teatro():
         teste_ia.teatro_ligado = True
         thread_ia = threading.Thread(target=teste_ia.iniciar_loop_ia, daemon=True)
         thread_ia.start()
+        
+        threading.Thread(target=ponte_rfid.iniciar_ponte, daemon=True).start()
         
         
         config_vozes = {}
@@ -152,36 +168,52 @@ def mudar_lua():
     global e_lua
     if e_lua == True:
         e_lua = False
-        registrar("Lua: movimento interrompido")
+        arduino.enviar("servo 3 descer")
+        registrar("Lua: descida")
     else:
         e_lua = True
-        registrar("Lua: movimento iniciado")
+        arduino.enviar("servo 3 subir")
+        registrar("Lua: subida")
 
 def mudar_foguete():
     global e_foguete
     if e_foguete == True:
         e_foguete = False
-        registrar("Foguete: movimento interrompido")
+        arduino.enviar("servo 2 descer")
+        registrar("Foguete: descido")
     else:
         e_foguete = True
-        registrar("Foguete: movimento iniciado")
+        arduino.enviar("servo 2 subir")
+        registrar("Foguete: subido")
     
 def mudar_prisma():
     global e_prisma
     if e_prisma == True:
         e_prisma = False
-        registrar("Prisma: movimento interrompido")
+        arduino.enviar("servo 1 descer")
+        registrar("Prisma: descido")
     else:
         e_prisma = True
-        registrar("Prisma: movimento iniciado")
+        arduino.enviar("servo 1 subir")
+        registrar("Prisma: subido")
     
 def mudar_historia():
     clima_escolhido = clima.get()
     registrar(f"Teor da História alterada para: {clima_escolhido}")
+
+def mudar_tema():
+    tema_escolhido = tema.get()
+    registrar(f"Tema da Historia alterada para: {tema_escolhido}")
     
 def mudar_luz():
     luz_escolhido = luz.get()
-    registrar(f"Luz do led alterada para: {luz_escolhido}")
+    efeito = LUZES.get(luz_escolhido)
+    
+    if efeito:
+        arduino.enviar(f"led {efeito} 40")
+        registrar(f"Luz do led alterada para: {luz_escolhido}")
+    else:
+        registrar(f"Luz '{luz_escolhido}' nao reconhecida")
     
 
 
@@ -191,7 +223,8 @@ def salvar_conf():
     dados_para_salvar = {
         "cenario": {
             "clima": clima.get(),
-            "luz": luz.get()
+            "luz": luz.get(),
+            "tema": tema.get()
         },
         "personagens": {}
     }
@@ -215,6 +248,7 @@ def carregar_conf():
             
             clima.set(dados.get("cenario", {}).get("clima", ""))
             luz.set(dados.get("cenario", {}).get("luz", "OFF"))
+            tema.set(dados.get("cenario", {}).get("tema", ""))
             
             if "personagens" in dados:
                 nomes_salvos = list(dados["personagens"].keys())
@@ -237,7 +271,7 @@ def carregar_conf():
 #janela principal
 janela = tkinter.Tk()
 janela.title("Configurações + Debug")
-janela.geometry("600x550")
+janela.geometry("600x600")
 
 abas = ttk.Notebook(janela)
 abas.pack(pady=10, fill="both", expand=True)
@@ -296,6 +330,14 @@ clima= tkinter.StringVar()
 tkinter.Entry(frame5, textvariable = clima, width=40).pack(side=tkinter.LEFT, padx = 5)
 tkinter.Button(frame5, text="Aplicar", command=mudar_historia).pack(side=tkinter.LEFT, padx=5)
 
+frame7 = tkinter.Frame(aba_cenario)
+frame7.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
+tkinter.Label(frame7, text="Tema da História:").pack(side=tkinter.LEFT)
+tema= tkinter.StringVar()
+tkinter.Entry(frame7, textvariable = tema, width=40).pack(side=tkinter.LEFT, padx = 5)
+tkinter.Button(frame7, text="Aplicar", command=mudar_tema).pack(side=tkinter.LEFT, padx=5)
+
+
 framep = tkinter.Frame(aba_cenario)
 framep.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
 tkinter.Label(framep, text="Nome dos personagens:").pack(side=tkinter.LEFT)
@@ -308,7 +350,7 @@ frame6 = tkinter.Frame(aba_cenario)
 frame6.pack(fill="x", padx=25, pady = 12.5, anchor=tkinter.CENTER)
 tkinter.Label(frame6, text="Controle da Luz:").pack(side=tkinter.LEFT)
 luz = tkinter.StringVar()
-luz.set("Off")
+luz.set("OFF")
 menu_luz=tkinter.OptionMenu(frame6, luz, "OFF", "Branco", "Fogo", "Espectro", "Dispersão de luz branca", "Cálculo em loop", "Fluxo de dados", "Decolagem do foguete", "Respirar")
 menu_luz.pack(side=tkinter.LEFT, padx=5)
 tkinter.Button(frame6, text="Aplicar", command=mudar_luz).pack(side=tkinter.LEFT, padx=5)

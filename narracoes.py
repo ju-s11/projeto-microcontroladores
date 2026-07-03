@@ -34,6 +34,10 @@ class GerenciadorDeVozes:
         self.cortar_cena = True
         if pygame.mixer.get_init():
             pygame.mixer.music.stop()
+            try:
+                pygame.mixer.music.unload()
+            except AttributeError:
+                pass
 
 
     def _inicializar_modelos(self, configuracao): 
@@ -62,73 +66,81 @@ class GerenciadorDeVozes:
             f.write("True")
             
         
-        fila_de_audios = queue.Queue() 
+        try:
+            fila_de_audios = queue.Queue() 
 
-        def tocar_audios():
-            
-            while True:
-                item = fila_de_audios.get()
+            def tocar_audios():
                 
+                while True:
+                    item = fila_de_audios.get()
+                    
+                    if self.cortar_cena:
+                        break
+
+                    if item is None: 
+                        break
+
+                    personagem, caminho_arquivo, vol, texto = item
+                    print(f"Tocando fala de {personagem}")
+                    
+                    if deb_print:
+                        deb_print(f"{personagem}: '{texto}'")
+                    
+                    pygame.mixer.music.load(caminho_arquivo)
+                    pygame.mixer.music.set_volume(vol)
+                    pygame.mixer.music.play()
+
+                    while pygame.mixer.music.get_busy():
+                        if self.cortar_cena:
+                            pygame.mixer.music.stop()
+                            try:
+                                pygame.mixer.music.unload()
+                            except AttributeError:
+                                pass
+                            break
+                        time.sleep(0.1)
+
+            thread = threading.Thread(target=tocar_audios)
+            thread.start()
+
+
+            for indice, frase in enumerate(lista_frases):
+                personagem = frase["personagem"]
+                texto = frase["texto"]
+
                 if self.cortar_cena:
                     break
+                    
+                if personagem not in self.vozes_carregadas:
+                    print(f"Personagem {personagem} não encontrado.")
+                    continue
 
-                if item is None: 
-                    break
+                voz = self.vozes_carregadas[personagem]
+                config_pers = self.configs_personagens[personagem]
 
-                personagem, caminho_arquivo, vol, texto = item
-                print(f"Tocando fala de {personagem}")
+                marcador = int(time.time())
                 
-                if deb_print:
-                    deb_print(f"{personagem}: '{texto}'")
+                nome_arquivo = f"fala{indice + 1:03d}_{personagem}_{marcador}.wav"
+                caminho_arquivo = os.path.join(self.diretorio_saida, nome_arquivo)
+
+                print(f"Gravando: {nome_arquivo}") 
+
+
+                piper = SynthesisConfig(length_scale=config_pers["velocidade"])
                 
-                pygame.mixer.music.load(caminho_arquivo)
-                pygame.mixer.music.set_volume(vol)
-                pygame.mixer.music.play()
+                with wave.open(caminho_arquivo, 'wb') as arquivo_wav:
+                    voz.synthesize_wav(texto, arquivo_wav, syn_config=piper)   
 
-                while pygame.mixer.music.get_busy():
-                    if self.cortar_cena:
-                        pygame.mixer.music.stop()
-                        break
-                    time.sleep(0.1)
+                fila_de_audios.put((personagem, caminho_arquivo, config_pers["volume"], texto))
 
-        thread = threading.Thread(target=tocar_audios)
-        thread.start()
+            fila_de_audios.put(None)
 
-
-        for indice, frase in enumerate(lista_frases):
-            personagem = frase["personagem"]
-            texto = frase["texto"]
-
-            if self.cortar_cena:
-                break
-                
-            if personagem not in self.vozes_carregadas:
-                print(f"Personagem {personagem} não encontrado.")
-                continue
-
-            voz = self.vozes_carregadas[personagem]
-            config_pers = self.configs_personagens[personagem]
-
-            nome_arquivo = f"fala{indice + 1:03d}_{personagem}.wav"
-            caminho_arquivo = os.path.join(self.diretorio_saida, nome_arquivo)
-
-            print(f"Gravando: {nome_arquivo}") 
-
-
-            piper = SynthesisConfig(length_scale=config_pers["velocidade"])
-            
-            with wave.open(caminho_arquivo, 'wb') as arquivo_wav:
-                voz.synthesize_wav(texto, arquivo_wav, syn_config=piper)   
-
-            fila_de_audios.put((personagem, caminho_arquivo, config_pers["volume"], texto))
-
-        fila_de_audios.put(None)
-
-        thread.join()
+            thread.join()
         #testeana
-        with open("narracao.txt", "w", encoding="utf-8") as f:
-            f.write("False")
-        print("\n\nProcesso concluido")
+        finally:
+            with open("narracao.txt", "w", encoding="utf-8") as f:
+                f.write("False")
+            print("\n\nProcesso concluido")
 
 if __name__ == "__main__":
     motor = GerenciadorDeVozes(TODAS_VOZES)
@@ -141,3 +153,4 @@ if __name__ == "__main__":
     ]
 
     motor.processar_mensagem(mensagem_exemplo)
+
