@@ -26,6 +26,9 @@ MFRC522 leitor3(SS_3, RST_3);
 String UID_NEWTON = "03A4699A";  // UID da tag do Isaac Newton
 String UID_LOVELACE = "0ED93202";  // UID da tag da Ada Lovelace
 String UID_HAMILTON = "A3A6DBE4";  // UID da tag da Margaret Hamilton
+String UID_EINSTEIN = "E3E5689A";
+String UID_CURIE = "FC0C3302";
+String UID_LATTES = "D0A04A10";
 
 unsigned long tempoAnteriorRfid = 0;
 unsigned long intervaloRfid = 5000;
@@ -68,7 +71,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 const int COLUNAS_LCD = 20;
 const int LINHAS_LCD = 4;
 
-String linhasTexto[50]; 
+String linhasTexto[100]; 
 int totalLinhas = 0;
 int linhaAtualScroll = 0;
 
@@ -321,6 +324,9 @@ void processarLed(String resto) {
 }
 
 void processarLcd(String resto) {
+  Serial.print(">>> LCD recebeu ");
+  Serial.print(resto.length());
+  Serial.println(" caracteres");
 
   quebrarTextoEmLinhas(resto);
 
@@ -397,10 +403,20 @@ String qualPersonagem(String uid) {
   else if (uid == UID_HAMILTON) {
     return "Margaret Hamilton";
   }
+  else if (uid == UID_EINSTEIN) {
+    return "Albert Einstein";
+  }
+  else if (uid == UID_CURIE) {
+    return "Marie Curie";
+  }
+  else if (uid == UID_LATTES) {
+    return "César Lattes";
+  }
   else {
     return "desconhecida";
   }
 }
+
 
 void setup() {
   Serial.begin(9600);
@@ -496,13 +512,10 @@ void loop() {
     if (millis() - ultimoTempoScroll >= INTERVALO_SCROLL) {
       ultimoTempoScroll = millis();
       
-      linhaAtualScroll++;
-      
-      if (linhaAtualScroll > totalLinhas - LINHAS_LCD) {
-        linhaAtualScroll = 0; 
+      if (linhaAtualScroll < totalLinhas - LINHAS_LCD) {
+        linhaAtualScroll++;
+        atualizarDisplay();
       }
-      
-      atualizarDisplay();
     }
   }
 
@@ -512,6 +525,10 @@ void loop() {
 
   if (millis() - tempoAnteriorRfid >= intervaloRfid) {
     tempoAnteriorRfid = millis();
+
+    leitor1.PCD_Init();
+    leitor2.PCD_Init();
+    leitor3.PCD_Init();
 
     String tag1 = lerLeitor(leitor1);
     String tag2 = lerLeitor(leitor2);
