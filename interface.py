@@ -7,7 +7,7 @@ from narracoes import GerenciadorDeVozes, TODAS_VOZES
 import threading
 import ia_controla_narracao2 as teste_ia 
 import time
-#import arduino
+import arduino
 import ponte_rfid
 
 estado_teatro = False
@@ -86,7 +86,13 @@ def iniciar_teatro():
     global estado_teatro, motor, ultima_data_json, thread_ia
     
     if estado_teatro == False:
+
+        with open ("palco.txt", "w", encoding="utf-8") as f:
+            f.write("")
         
+        if os.path.exists("historia.json"):
+            os.remove("historia.json")
+
         if thread_ia is not None and thread_ia.is_alive():
             registrar("Ia encerrando a ultima cena.")
             return
@@ -168,11 +174,11 @@ def mudar_lua():
     global e_lua
     if e_lua == True:
         e_lua = False
-        arduino.enviar("servo 3 descer")
+        arduino.enviar("servo 1 descer")
         registrar("Lua: descida")
     else:
         e_lua = True
-        arduino.enviar("servo 3 subir")
+        arduino.enviar("servo 1 subir")
         registrar("Lua: subida")
 
 def mudar_foguete():
@@ -190,11 +196,11 @@ def mudar_prisma():
     global e_prisma
     if e_prisma == True:
         e_prisma = False
-        arduino.enviar("servo 1 descer")
+        arduino.enviar("servo 3 descer")
         registrar("Prisma: descido")
     else:
         e_prisma = True
-        arduino.enviar("servo 1 subir")
+        arduino.enviar("servo 3 subir")
         registrar("Prisma: subido")
     
 def mudar_historia():
@@ -208,10 +214,11 @@ def mudar_tema():
 def mudar_luz():
     luz_escolhido = luz.get()
     efeito = LUZES.get(luz_escolhido)
+    velluz_escolhida = vel_l.get()
     
     if efeito:
-        arduino.enviar(f"led {efeito} 40")
-        registrar(f"Luz do led alterada para: {luz_escolhido}")
+        arduino.enviar(f"led {efeito} {velluz_escolhida}")
+        registrar(f"Luz do led alterada para: {luz_escolhido}\nE intervalo de tempo alterado para: {velluz_escolhida}")
     else:
         registrar(f"Luz '{luz_escolhido}' nao reconhecida")
     
@@ -271,7 +278,7 @@ def carregar_conf():
 #janela principal
 janela = tkinter.Tk()
 janela.title("Configurações + Debug")
-janela.geometry("600x600")
+janela.geometry("650x650")
 
 abas = ttk.Notebook(janela)
 abas.pack(pady=10, fill="both", expand=True)
@@ -353,6 +360,9 @@ luz = tkinter.StringVar()
 luz.set("OFF")
 menu_luz=tkinter.OptionMenu(frame6, luz, "OFF", "Branco", "Fogo", "Espectro", "Dispersão de luz branca", "Cálculo em loop", "Fluxo de dados", "Decolagem do foguete", "Respirar")
 menu_luz.pack(side=tkinter.LEFT, padx=5)
+vel_l = tkinter.Scale(frame6, from_=0, to=500, orient=tkinter.HORIZONTAL, label = "Intervalo de tempo do led")
+vel_l.set(40)
+vel_l.pack(side=tkinter.LEFT, padx=10)
 tkinter.Button(frame6, text="Aplicar", command=mudar_luz).pack(side=tkinter.LEFT, padx=5)
 
 tkinter.Button(aba_cenario, text="Salvar Configurações", command=salvar_conf, bg="lightgrey", font=("Arial", 10, "bold")).pack(pady=10)
