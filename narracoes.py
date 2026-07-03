@@ -5,6 +5,7 @@ from piper import PiperVoice, SynthesisConfig
 import threading
 import queue
 import time
+import arduino
 
 #pip install piper-tts
 #pip install pygame
@@ -85,6 +86,8 @@ class GerenciadorDeVozes:
                     
                     if deb_print:
                         deb_print(f"{personagem}: '{texto}'")
+
+                    arduino.enviar("lcd " + texto)
                     
                     pygame.mixer.music.load(caminho_arquivo)
                     pygame.mixer.music.set_volume(vol)
