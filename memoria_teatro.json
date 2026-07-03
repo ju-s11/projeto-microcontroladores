@@ -1,0 +1,24 @@
+{
+    "cenario": {
+        "clima": "Alegre",
+        "luz": "OFF",
+        "tema": "Egito Antigo"
+    },
+    "personagens": {
+        "Cleopatra": {
+            "voz": "Alba",
+            "volume": 80,
+            "velocidade": 100
+        },
+        "Marco Antonio": {
+            "voz": "Northern Male",
+            "volume": 80,
+            "velocidade": 100
+        },
+        "Julio Cesar": {
+            "voz": "Alan",
+            "volume": 80,
+            "velocidade": 100
+        }
+    }
+}
