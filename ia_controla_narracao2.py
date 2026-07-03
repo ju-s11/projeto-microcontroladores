@@ -3,10 +3,8 @@ from smolagents import CodeAgent, InferenceClientModel, tool
 import arduino
 
 '''
-TO-DO:
-- melhorar o prompt para gerar dialogos diferentes
+TO-DO
 - ajeitar as vozes que nao estao sendo salvas na memoria ao reiniciar o teatro
-- dar um jeito de quebrar o loop eterno da IA pra fechar o programa
 '''
 
 SERVOS = {"prisma": 1, "foguete": 2, "lua": 3}
