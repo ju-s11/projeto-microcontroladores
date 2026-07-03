@@ -18,7 +18,7 @@ ultimo_estado_palco = ""
 ultima_historia = ""
 teatro_ligado = True
 
-token = ""
+token = "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"
 
 '''
 modelo = TransformersModel(
@@ -34,8 +34,8 @@ modelo = LiteLLMModel(
 '''
 modelo = InferenceClientModel(
     token=token,
-    model_id = "Qwen/Qwen2.5-7B-Instruct"
-    #model_id = "meta-llama/Llama-3.1-8B-Instruct"
+    #model_id = "Qwen/Qwen2.5-7B-Instruct"
+    model_id = "meta-llama/Llama-3.1-8B-Instruct"
     )
 
 @tool
@@ -227,9 +227,9 @@ tools = [verificar_palco, mover_elemento, acender_led, narrar, salvar_historia]
 #Verificar se eu preciso passar o nome das tools mesmo ou nao
 agent = CodeAgent(
     tools = tools,
-    model = modelo,
-    additional_authorized_imports=["random", "time"]
+    model = modelo
 )
+agent.authorized_imports.extend(["random", "time"])
 
 prompt = """
 Você é o diretor e o roteirista criativo do teatro automatizado. 
@@ -241,11 +241,14 @@ Se o retorno for 'Sem mudanças', simplesmente aguarde um momento usando uma pau
 Quando novos personagens entrarem em cena, assuma o controle físico do teatro: 
 mova os elementos cenográficos correspondentes e mude a cor da iluminação em LED para cada um deles. 
 
-Exerça seu papel de roteirista apenas quando novos personagens forem detectados, crie uma lista 'historia' totalmente nova e limpa do zero para aquela rodada específica.
-Percorra os personagens detectados usando um laço "for" comum e gere o roteiro, em ingles, diretamente dentro dele (proibido usar "if/elif" para nomes fixos ou criar subfunções). 
-Para cada personagem, escreva manualmente um texto inédito em inglês, se tiver mais de um personagem em cena escreva um diálogo
+Exerça seu papel de roteirista apenas quando novos personagens forem detectados, crie uma lista 'historia' totalmente nova e limpa, sem usar memórias ou falas de cenas anteriores.
 
-Formate o resultado como uma lista de dicionários com as chaves "personagem" (nome exato) e "texto" (apenas a fala limpa). Envie essa lista ('historia') como argumento para salvar_historia(historia) e narrar(historia), faça uma pausa de alguns segundos e reinicie o loop. 
+Gere um roteiro, inédito e criativo, em ingles.
+Se houver mais de um personagem em cena, crie um diálogo dinâmico onde eles interagem entre si, mantendo o tema
+Não utilize lógica de programação para definir as falas; em vez disso, use sua capacidade de geração de texto para criar um conteúdo original e único para cada rodada.
+
+Formate o resultado como uma lista de dicionários com as chaves "personagem" (nome exato) e "texto" (apenas a fala limpa). 
+Envie essa lista ('historia') como argumento para salvar_historia(historia) e narrar(historia), faça uma pausa de alguns segundos e reinicie o loop. 
 Mantenha-se vigiando o palco para sempre.
 
 """
