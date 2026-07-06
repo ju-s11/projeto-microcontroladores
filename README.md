@@ -22,7 +22,7 @@ O sistema detecta a presença dos personagens através de leitores RFID. A ponte
 - Smolagents versão 1.26
 - Pyserial versão 3.5
 - ServoTimer2 - biblioteca para os servos encontrada neste [link](https://github.com/nabontra/ServoTimer2)
-- Modelos de voz - é necessário ter a pasta modelos/ no diretório raiz com os arquivos .onnx que pode ser encontrado nesse [link](https://drive.google.com/drive/folders/1dYDVqlYoaun7ELEjK224L1el2gv5nK6A?usp=sharing) 
+- Modelos de voz - é necessário ter a pasta modelos/ no diretório raiz com os arquivos .onnx que podem ser encontrado nesse [link](https://drive.google.com/drive/folders/1dYDVqlYoaun7ELEjK224L1el2gv5nK6A?usp=sharing) 
 
 ## Instalação
 Para executar o projeto é necessário um interpretador Python e a Arduino IDE para gerenciar o microcontrolador.
@@ -38,7 +38,7 @@ Para compilar o código .ino no seu microcontrolador, é necessário instalar a 
 ## Como Usar
 Clone este repositório
 ```console
-$git clone
+$git clone https://github.com/ju-s11/projeto-microcontroladores.git
 ```
 
 E rode o arquivo inteface.py
