@@ -15,6 +15,10 @@ A narração fica por conta da biblioteca Piper-TTS. O sistema converte o roteir
 
 O sistema detecta a presença dos personagens através de leitores RFID. A ponte de comunicação lê os UIDs das tags presentes e atualiza o estado do palco, que é lido pelo agente de IA para decidir qual cena será encenada.
 
+## Esquemático do Circuito
+
+![Diagrama do Circuito](<img width="6723" height="2868" alt="Esquemático_Circuito_bb" src="https://github.com/user-attachments/assets/0ceba21a-7cb6-430a-ae4a-12fe0a6f878e"/>)
+
 ## Pré-Requisitos
 - Python versão 3.13
 - Pygame versão 2.6
