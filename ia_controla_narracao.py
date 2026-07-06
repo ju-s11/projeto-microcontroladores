@@ -2,10 +2,6 @@ import json, os, time
 from smolagents import CodeAgent, InferenceClientModel, tool
 import arduino
 
-'''
-TO-DO
-- ajeitar as vozes que nao estao sendo salvas na memoria ao reiniciar o teatro
-'''
 
 SERVOS = {"prisma": 1, "foguete": 2, "lua": 3}
 EFEITOS_VALIDOS = ["apagar", "branco", "fogo", "espectro", "dispersao", "dados", "calculo", "decolagem", "respirar"]
@@ -16,20 +12,9 @@ ultimo_estado_palco = ""
 ultima_historia = ""
 teatro_ligado = True
 
-token = "SEU TOKEN"
+token = ""
 
-'''
-modelo = TransformersModel(
-    model_id="Qwen/Qwen2.5-1.5B-Instruct",
-    #host="http://localhost:11434"
-    device_map="auto"
-)
 
-modelo = LiteLLMModel(
-    model_id="ollama_chat/qwen2.5:1.5b"
-)
-
-'''
 modelo = InferenceClientModel(
     token=token,
     #model_id = "Qwen/Qwen2.5-7B-Instruct"
@@ -64,7 +49,7 @@ def verificar_palco() -> str:
     if not os.path.exists("palco.txt"):
         return "Sem mudanças"
             
-    #usando o arquivo como um mock do palco
+
     with open("palco.txt","r",encoding="utf-8") as arquivo:
         personagens_atuais = arquivo.read().strip()
         
@@ -103,13 +88,6 @@ def mover_elemento(elemento: str, acao: str) -> str:
     print(f" [DEBUG SERVO] IA mandando: {comando}")
     arduino.enviar(comando)
     return f"Servo do(a) {elemento} executou: {acao}"
-
-    ##comando = f"MOVER_SERVO:{elemento}:{angulo}"
-    ##print(f"[PSEUDOCOMANDO] {comando}")
-
-    ## Aqui seria a integraçao com o codigo da Julia
-
-    ##return f"Servo do(a) {elemento} movido para {angulo} graus"
 
 
 @tool
@@ -220,6 +198,7 @@ def carregar_informacoes_teatro():
     caminho_arquivo = "memoria_teatro.json"
     if os.path.exists(caminho_arquivo):
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
+            #pega texto do arquivo json e transforma em um dicionario python
             return json.load(arquivo)
     return None
             
@@ -227,7 +206,7 @@ def carregar_informacoes_teatro():
 
 tools = [verificar_palco, mover_elemento, acender_led, narrar, salvar_historia]
 
-#Verificar se eu preciso passar o nome das tools mesmo ou nao
+
 agent = CodeAgent(
     tools = tools,
     model = modelo
@@ -265,6 +244,7 @@ def iniciar_loop_ia():
 
     if config:
         if "cenario" in config:
+            #busca respostas do usuario em memoria.json se nao achar, usa o valor padrão mesmo
             clima = config["cenario"].get("clima", "neutro")
             tema = config["cenario"].get("tema", "ciência")
         if "personagens" in config:
