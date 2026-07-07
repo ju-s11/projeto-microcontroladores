@@ -17,7 +17,7 @@ O sistema detecta a presença dos personagens através de leitores RFID. A ponte
 
 ## Esquemático do Circuito
 
-![Diagrama do Circuito](./assets/minha-imagem.png)
+![Diagrama do Circuito](https://github.com/ju-s11/projeto-microcontroladores/blob/main/assets/Esquem%C3%A1tico_Circuito_bb.png?raw=true)
 
 ## Pré-Requisitos
 - Python versão 3.13
