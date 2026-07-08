@@ -1,6 +1,7 @@
 # ENG4033 - Microcontroladores - Projeto Final
-[![Video do Projeto](https://img.youtube.com/vi/jjCPcgFfCFA/maxresdefault.jpg)](https://www.youtube.com/watch?v=jjCPcgFfCFA)
+▶️ [Assista no YouTube:](https://www.youtube.com/watch?v=jjCPcgFfCFA)
 
+[![](https://img.youtube.com/vi/jjCPcgFfCFA/mqdefault.jpg)](https://www.youtube.com/watch?v=jjCPcgFfCFA)
 ## Tema
 
 Projeto da disciplina ENG4033 - Projeto de Programação em Microcontroladores com o tema Teatro Interativo Automatizado. O objetivo foi desenvolver um sistema de teatro automatizado onde personagens (representados por tags RFID) interagem com o ambiente, acionando mecanismos físicos e uma narração gerada dinamicamente por Inteligência Artificial.
