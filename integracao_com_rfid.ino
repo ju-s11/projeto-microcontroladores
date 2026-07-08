@@ -31,7 +31,7 @@ String UID_CURIE = "FC0C3302";
 String UID_LATTES = "D0A04A10";
 
 unsigned long tempoAnteriorRfid = 0;
-unsigned long intervaloRfid = 5000;
+unsigned long intervaloRfid = 8000;
 
 // LEDS
 
