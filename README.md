@@ -1,5 +1,5 @@
 # ENG4033 - Microcontroladores - Projeto Final
-[![Título do Vídeo](https://img.youtube.com/vi/jjCPcgFfCFA/maxresdefault.jpg)](https://www.youtube.com/watch?v=jjCPcgFfCFA)
+[![Video do Projeto](https://img.youtube.com/vi/jjCPcgFfCFA/maxresdefault.jpg)](https://www.youtube.com/watch?v=jjCPcgFfCFA)
 
 ## Tema
 
